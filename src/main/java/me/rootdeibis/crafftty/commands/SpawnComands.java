@@ -9,6 +9,13 @@ public class SpawnComands {
 
     @CoreCommand(name = "setspawn", permission = "core.cmd.setspawn", aliases = {"setlobby"})
     public void setSpawn(CommandSender sender, String label, String[] args) {
-        sender.sendMessage("Holis");
+
+
+
+    }
+
+    @CoreCommand(name = "spawn", permission = "core.cmd.spawn", aliases = {"lobby"})
+    public void spawn() {
+
     }
 }

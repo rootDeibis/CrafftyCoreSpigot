@@ -1,8 +1,13 @@
 package me.rootdeibis.crafftty.core.commands;
 
+import me.rootdeibis.crafftty.CrafttySpigotCore;
 import me.rootdeibis.crafftty.core.commands.annotations.CoreCommand;
 import me.rootdeibis.crafftty.core.commands.annotations.CoreCommandLoader;
+import me.rootdeibis.crafftty.core.commands.annotations.CoreSubCommands;
+import me.rootdeibis.crafftty.manager.Files.RFile;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -14,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,8 +75,25 @@ public class CoreCommandManager {
         methods.forEach(method -> {
 
             CoreCommand command = method.getAnnotation(CoreCommand.class);
+            CoreSubCommands subCommands = method.getAnnotation(CoreSubCommands.class);
 
-            CommandContextExecutor contextExecutor = new CommandContextExecutor(command.name(), command, method, clazz);
+
+            List<SubCommandContext> subcommands = new ArrayList<>();
+
+
+            if(subCommands != null) {
+
+                for (Class<?> sClass : subCommands.list()) {
+                    Arrays.stream(sClass.getMethods()).filter(m -> m.isAnnotationPresent(CoreCommand.class)).findFirst().ifPresent(sMethod -> subcommands.add(new SubCommandContext(method.getAnnotation(CoreCommand.class),sClass, sMethod)));
+
+                }
+
+            }
+
+
+            CommandContext commandContext = new CommandContext(command, method, clazz);
+
+            CommandContextExecutor contextExecutor = new CommandContextExecutor(commandContext);
 
             contextExecutor.setAliases(Arrays.stream(command.aliases()).collect(Collectors.toList()));
             contextExecutor.setPermission(command.permission());
@@ -95,37 +118,4 @@ public class CoreCommandManager {
         return commandMap;
     }
 
-    private static class CommandContextExecutor extends BukkitCommand {
-
-        private final CoreCommand commandMethod;
-        private final Method method;
-        private final Object declaredClass;
-        protected CommandContextExecutor(String name, CoreCommand commandMethod, Method method,Class<?> clazz) {
-            super(name);
-            this.commandMethod = commandMethod;
-            this.method = method;
-
-            try {
-                this.declaredClass = clazz.newInstance();
-            } catch (InstantiationException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public boolean execute(CommandSender commandSender, String label, String[] strings) {
-
-            try {
-                this.method.invoke(this.declaredClass, commandSender, label, strings);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-
-            return false;
-        }
-    }
 }

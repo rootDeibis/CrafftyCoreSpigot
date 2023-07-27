@@ -1,0 +1,3 @@
+prefix: "&7Craftty >&r"
+commands:
+  no-permission: "%prefix% &cNo tienes los permisos suficientes para esto."
