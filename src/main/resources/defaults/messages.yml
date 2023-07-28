@@ -1,6 +1,12 @@
 prefix: "&7Craftty >&r"
 commands:
+  reload: "%prefix% &aLa configuracion fue recargada."
   no-permission: "%prefix% &cNo tienes los permisos suficientes para esto."
   spawn:
     set: "%prefix% &eEl spawn fue colocado exitosamente"
     teleport: "%prefix% &aTeletransportando al spawn..."
+  protection:
+    types:
+      - "%prefix% &cDebes usar /core protect <type>"
+      - ""
+      - "&6Tipos: &e%types%"

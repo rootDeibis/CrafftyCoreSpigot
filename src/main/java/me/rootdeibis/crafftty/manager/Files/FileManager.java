@@ -55,5 +55,9 @@ public class FileManager {
 		return instance.getDataFolder();
 	}
 
+	public void reload() {
+		this.FilesCache.values().forEach(RFile::reload);
+	}
+
 
 }

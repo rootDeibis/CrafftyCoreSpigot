@@ -1,6 +1,5 @@
 package me.rootdeibis.crafftty.core.commands;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import me.rootdeibis.crafftty.CrafttySpigotCore;
 import me.rootdeibis.crafftty.manager.Files.RFile;
 import org.bukkit.ChatColor;
@@ -11,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 public class CommandContextExecutor extends BukkitCommand {
 
@@ -24,7 +22,7 @@ public class CommandContextExecutor extends BukkitCommand {
     }
 
     @FunctionalInterface
-    private interface Function<In1, Out> {
+    private static interface Function<In1, Out> {
         Out apply(In1 in1);
     }
 
@@ -39,7 +37,7 @@ public class CommandContextExecutor extends BukkitCommand {
         } else {
             if(this.commandContext.getSubCommands().size() == 0 || args.length == 0) {
 
-                this.invokeMethod(this.commandContext.getCommandMethod(), this.commandContext.getCommandClass(), commandSender, s, args);
+                invokeMethod(this.commandContext.getCommandMethod(), this.commandContext.getCommandClass(), commandSender, s, args);
             } else {
 
                 this.commandContext.getSubCommands().stream().filter(d -> d.getSubcommand().name().equalsIgnoreCase(args[0]) || Arrays.stream(d.getSubcommand().aliases()).anyMatch(ds -> ds.equalsIgnoreCase(args[0]))).findFirst().ifPresent(sub -> {
@@ -49,7 +47,7 @@ public class CommandContextExecutor extends BukkitCommand {
                     } else {
 
 
-                        this.invokeMethod(sub.getSubcommandMethod(), sub.getSubcommandClass(), commandSender, sub.getSubcommand().name(), Arrays.stream(args, args.length == 1 ? 0 : 1, args.length).toArray(String[]::new));
+                        invokeMethod(sub.getSubcommandMethod(), sub.getSubcommandClass(), commandSender, sub.getSubcommand().name(), Arrays.stream(args, 1, args.length).toArray(String[]::new));
 
                     }
 
@@ -60,20 +58,30 @@ public class CommandContextExecutor extends BukkitCommand {
         return false;
     }
 
-    public void invokeMethod(Method method, Object instance,CommandSender commandSender, String s, String[] strings) {
+    public static void invokeMethod(Method method, Object instance,CommandSender commandSender, String s, String[] strings) {
         try {
 
-            Function<Integer, Object> resolve = (pos) -> this.resolveParameter(method, pos, commandSender, s, strings);
+            Function<Integer, Object> resolve = (pos) -> resolveParameter(method, pos, commandSender, s, strings);
 
+            int parameterCount = method.getParameters().length;
 
-            method.invoke(instance, resolve.apply(0), resolve.apply(1), resolve.apply(2));
+            if(parameterCount == 1) {
+                method.invoke(instance, resolve.apply(0));
+            }
+            if(parameterCount == 2) {
+                method.invoke(instance, resolve.apply(0),resolve.apply(1));
+            }
+
+            if(parameterCount == 3) {
+                method.invoke(instance, resolve.apply(0),resolve.apply(1),resolve.apply(2));
+            }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    private Object resolveParameter(Method method, int paremeterPos,CommandSender commandSender, String s, String[] strings) {
+    private static Object resolveParameter(Method method, int paremeterPos,CommandSender commandSender, String s, String[] strings) {
 
         Parameter parameter = method.getParameters()[paremeterPos];
 
