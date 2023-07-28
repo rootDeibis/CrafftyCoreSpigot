@@ -84,14 +84,14 @@ public class CoreCommandManager {
             if(subCommands != null) {
 
                 for (Class<?> sClass : subCommands.list()) {
-                    Arrays.stream(sClass.getMethods()).filter(m -> m.isAnnotationPresent(CoreCommand.class)).findFirst().ifPresent(sMethod -> subcommands.add(new SubCommandContext(method.getAnnotation(CoreCommand.class),sClass, sMethod)));
+                    Arrays.stream(sClass.getMethods()).filter(m -> m.isAnnotationPresent(CoreCommand.class)).forEach(sMethod -> subcommands.add(new SubCommandContext(sMethod.getAnnotation(CoreCommand.class),sClass, sMethod)));
 
                 }
 
             }
 
 
-            CommandContext commandContext = new CommandContext(command, method, clazz);
+            CommandContext commandContext = new CommandContext(command, method, clazz, subcommands);
 
             CommandContextExecutor contextExecutor = new CommandContextExecutor(commandContext);
 

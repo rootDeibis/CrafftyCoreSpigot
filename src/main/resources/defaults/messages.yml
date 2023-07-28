@@ -1,0 +1,6 @@
+prefix: "&7Craftty >&r"
+commands:
+  no-permission: "%prefix% &cNo tienes los permisos suficientes para esto."
+  spawn:
+    set: "%prefix% &eEl spawn fue colocado exitosamente"
+    teleport: "%prefix% &aTeletransportando al spawn..."

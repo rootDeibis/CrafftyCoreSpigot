@@ -16,7 +16,13 @@ public class CommandContext {
     public CommandContext(CoreCommand command, Method commandMethod, Class<?> commandClass) {
         this.command = command;
         this.commandMethod = commandMethod;
-        this.commandClass = commandClass;
+        try {
+            this.commandClass = commandClass.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public CommandContext(CoreCommand command, Method commandMethod, Class<?> commandClass, List<SubCommandContext> subCommands) {

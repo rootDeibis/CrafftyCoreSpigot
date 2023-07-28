@@ -1,0 +1,8 @@
+spawn:
+  teleport-join: true
+  disable:
+    spawn-monsters: true
+    break-block: true
+    place-block: true
+    interact-block: true
+    damage: true

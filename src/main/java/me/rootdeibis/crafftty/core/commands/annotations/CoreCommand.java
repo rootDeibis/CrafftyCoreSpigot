@@ -12,8 +12,8 @@ public @interface CoreCommand {
 
     String name();
 
-    String permission();
+    String permission() default "";
 
-    String[] aliases();
+    String[] aliases() default {};
 
 }
