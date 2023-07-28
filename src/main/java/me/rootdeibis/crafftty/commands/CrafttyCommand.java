@@ -19,7 +19,7 @@ public class CrafttyCommand {
 
     }
 
-    @TabCompletion(to = TabCompletion.TargetType.SUBCOMMAND, subcommand = "protection")
+    @TabCompletion(target = TabCompletion.TargetType.MAIN, command = "craftty")
     public List<String> onTabComplete(CommandSender sender, String label, String[] args) {
         return new ArrayList<>();
     }

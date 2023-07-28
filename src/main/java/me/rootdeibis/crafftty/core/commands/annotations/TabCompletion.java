@@ -8,13 +8,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TabCompletion {
+
+
     public static enum TargetType {
         SUBCOMMAND,
         MAIN
     }
 
-    TargetType to() default TargetType.MAIN;
 
+    TargetType target();
+
+    String command();
     String subcommand() default "";
 
 

@@ -1,6 +1,8 @@
 package me.rootdeibis.crafftty;
 
-import me.rootdeibis.crafftty.core.commands.CoreCommandManager;
+import me.rootdeibis.crafftty.commands.CrafttyCommand;
+import me.rootdeibis.crafftty.commands.SpawnCommands;
+import me.rootdeibis.crafftty.core.commands.CommandLoader;
 import me.rootdeibis.crafftty.manager.Files.FileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -32,7 +34,8 @@ public final class CrafttySpigotCore extends JavaPlugin {
                 .create();
 
 
-        CoreCommandManager.scan("me.rootdeibis.crafftty.commands");
+        new CommandLoader(SpawnCommands.class).register();
+        new CommandLoader(CrafttyCommand.class).register();
 
 
         loadListeners();
