@@ -17,42 +17,33 @@ public class TabCompletionContext {
     private final Method[] subCommandCompletions;
 
     private final CommandContext commandContext;
+
+
     public TabCompletionContext(Method[] completionMethods, CommandContext commandContext) {
         this.mainCompletion = Arrays.stream(completionMethods).filter(m -> ((TabCompletion) m.getAnnotation(TabCompletion.class)).target() == TabCompletion.TargetType.MAIN ).findFirst().orElse(null);
         this.subCommandCompletions = Arrays.stream(completionMethods).filter(m -> ((TabCompletion) m.getAnnotation(TabCompletion.class)).target() == TabCompletion.TargetType.SUBCOMMAND ).toArray(Method[]::new);
         this.commandContext = commandContext;
+
     }
 
 
     public List<String> getMainCompletions(Object... arguments) {
-        List<String> list = new ArrayList<>();
-        try {
-            Object completions = MethodUtils.invokeMethod(this.commandContext.getLoader().getCommandLoaderClass().newInstance(),  this.mainCompletion,arguments);
-            return  completions instanceof List ? (List<String>) completions : list;
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        return MethodUtils.invokeMethod(this.commandContext.getLoader().getInitializedClass(),  this.mainCompletion,arguments);
     }
 
     public List<String> getSubCommandCompletions(String subCommand, Object... arguments) {
         List<String> list = new ArrayList<>();
         Predicate<Method> predicateMethod = (m -> {
-            CoreCommand command = m.getAnnotation(CoreCommand.class);
-
-            return command.name().equalsIgnoreCase(subCommand) || Arrays.stream(command.aliases()).anyMatch(a -> a.equalsIgnoreCase(subCommand));
+            TabCompletion command = m.getAnnotation(TabCompletion.class);
+            return command.command().equalsIgnoreCase(this.commandContext.getCommand().name()) &&
+            this.commandContext.getSubCommands().stream().anyMatch(s -> Arrays.stream(s.getSubCommand().aliases()).anyMatch(d -> d.equalsIgnoreCase(subCommand))) ||
+                    command.subcommand().equalsIgnoreCase(subCommand);
         });
 
         if(Arrays.stream(this.subCommandCompletions).anyMatch(predicateMethod)) {
             Method completionMethod = Arrays.stream(this.subCommandCompletions).filter(predicateMethod).findAny().get();
 
-            Object completions = list;
-            try {
-                completions = MethodUtils.invokeMethod(this.commandContext.getLoader().getCommandLoaderClass().newInstance(), completionMethod,arguments);
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-
-            return completions instanceof List ? (List<String>) completions : list;
+                return MethodUtils.invokeMethod(this.commandContext.getLoader().getInitializedClass(), completionMethod,arguments);
 
         }
 

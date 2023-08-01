@@ -1,5 +1,7 @@
 package me.rootdeibis.crafftty;
 
+import com.github.games647.fastlogin.bukkit.FastLoginBukkit;
+import me.rootdeibis.crafftty.auth.hook.FastNLoginAuth;
 import me.rootdeibis.crafftty.commands.CrafttyCommand;
 import me.rootdeibis.crafftty.commands.SpawnCommands;
 import me.rootdeibis.crafftty.core.commands.CommandLoader;
@@ -9,7 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
-
 
 public final class CrafttySpigotCore extends JavaPlugin {
 
@@ -39,6 +40,15 @@ public final class CrafttySpigotCore extends JavaPlugin {
 
 
         loadListeners();
+
+        if(Bukkit.getPluginManager().getPlugin("nLogin") != null) {
+            FastLoginBukkit fastLoginBukkit = (FastLoginBukkit) Bukkit.getPluginManager().getPlugin("FastLogin");
+
+            fastLoginBukkit.getCore().setAuthPluginHook(new FastNLoginAuth());
+
+            Bukkit.getConsoleSender().sendMessage("FastNLoginAuth Hooked");
+
+        }
     }
 
     @Override

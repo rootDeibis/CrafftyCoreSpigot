@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 public class MethodUtils {
 
-    public static Object invokeMethod(Object instance, Method method, Object... values) {
+    public static <T> T invokeMethod(Object instance, Method method, Object... values) {
         LinkedList<Object> parameters = new LinkedList<>();
 
         for (Class<?> parameterType : method.getParameterTypes()) {
@@ -18,7 +18,7 @@ public class MethodUtils {
         }
 
         try {
-            return method.invoke(instance, parameters.toArray());
+            return (T) method.invoke(instance, parameters.toArray());
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

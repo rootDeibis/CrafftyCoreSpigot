@@ -8,8 +8,11 @@ import me.rootdeibis.crafftty.manager.Files.RFile;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,8 @@ public class CoreCommandExecutor extends BukkitCommand {
         this.setPermission(commandContext.getCommand().permission());
 
         this.commandContext = commandContext;
+
+
     }
 
     @FunctionalInterface
@@ -42,25 +47,25 @@ public class CoreCommandExecutor extends BukkitCommand {
         } else {
             if(this.commandContext.getSubCommands().size() == 0 || args.length == 0) {
 
-                MethodUtils.invokeMethod(this.commandContext.getLoader().getInitalizedClass(), this.commandContext.getCommandMethod(), commandSender, s, args);
+                return MethodUtils.invokeMethod(this.commandContext.getLoader().getInitializedClass(),
+                        this.commandContext.getCommandMethod(), commandSender, s, args);
             } else {
 
 
-
-                this.commandContext.getSubCommands().stream().filter(d -> d.getSubCommand().name().equalsIgnoreCase(args[0]) || Arrays.stream(d.getSubCommand().aliases()).anyMatch(ds -> ds.equalsIgnoreCase(args[0]))).findFirst().ifPresent(sub -> {
-
-                    if(needPermission.apply(sub.getSubCommand().permission())) {
-                        commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', file.getString("commands.no-permission")));
-                    } else {
+                SubCommandContext subCommandContext = this.commandContext.getSubCommands().stream().filter(d -> d.getSubCommand().name().equalsIgnoreCase(args[0]) || Arrays.stream(d.getSubCommand().aliases()).anyMatch(ds -> ds.equalsIgnoreCase(args[0]))).findFirst().orElse(null);
 
 
+               if(subCommandContext != null) {
+                   if(needPermission.apply(subCommandContext.getSubCommand().permission())) {
+                       commandSender.sendMessage(ChatColor.translateAlternateColorCodes('&', file.getString("commands.no-permission")));
+                   } else {
 
-                            MethodUtils.invokeMethod(sub.getInializedClass(),sub.getSubCommandMethod(), commandSender, s, Arrays.stream(args, 1, args.length).toArray(String[]::new));
 
-                    }
+                       return MethodUtils.invokeMethod(subCommandContext.getInializedClass(),
+                               subCommandContext.getSubCommandMethod(), commandSender, s, Arrays.stream(args, 1, args.length).toArray(String[]::new));
 
-                });
-
+                   }
+               }
             }
         }
         return false;
@@ -69,9 +74,18 @@ public class CoreCommandExecutor extends BukkitCommand {
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
 
-        if(args.length >= 1) {
-            return this.commandContext.getTabCompletionContext().getSubCommandCompletions(args[0],alias, args);
+        List<String> completions = this.commandContext.getTabCompletionContext().getMainCompletions();
+        if(args.length >= 2) {
+            completions = this.commandContext.getTabCompletionContext().getSubCommandCompletions(args[0],sender,alias, args);
+
+            if(args[1] != null && args[1].length() > 0) {
+                completions = completions.stream().filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
+            }
+        } else if(args[0] != null && args[0].length() > 0) {
+           completions = completions.stream().filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
-        return this.commandContext.getTabCompletionContext().getMainCompletions(sender,alias, args);
+
+        return completions;
+
     }
 }

@@ -1,3 +1,6 @@
 name: CrafttySpigotCore
 version: '${project.version}'
 main: me.rootdeibis.crafftty.CrafttySpigotCore
+depend:
+  - FastLogin
+  - nLogin

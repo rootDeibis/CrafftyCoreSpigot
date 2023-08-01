@@ -14,11 +14,10 @@ import org.bukkit.entity.Player;
 public class SpawnCommands {
 
     @CoreCommand(name = "setspawn", permission = "core.cmd.setspawn", aliases = {"setlobby"})
-    public void setSpawn( String label, String[] args, CommandSender sender) {
+    public boolean setSpawn(CommandSender sender) {
 
 
         if(sender instanceof Player) {
-            RFile messages = CrafttySpigotCore.getFileManager().use("messages.yml");
 
             SpawnManager.set(((Player) sender).getLocation());
 
@@ -26,19 +25,19 @@ public class SpawnCommands {
 
         }
 
-
+        return false;
     }
 
     @CoreCommand(name = "spawn", permission = "core.cmd.spawn", aliases = {"lobby"})
-    public void spawn(CommandSender sender, String label, String[] args) {
+    public boolean spawn(CommandSender sender) {
         if(sender instanceof Player) {
             if(SpawnManager.isSpawnLaoded()) {
-                RFile messages = CrafttySpigotCore.getFileManager().use("messages.yml");
 
                 ((Player) sender).teleport(SpawnManager.getSpawnLocation());
 
                 sender.sendMessage(Messages.format("commands.spawn.teleport", new Messages.Placeholders()));
             }
         }
+        return false;
     }
 }

@@ -13,14 +13,14 @@ import java.util.Arrays;
 
 public class CommandLoader {
     private final Class<?> commandloaderClass;
-    private final Object initalizedClass;
+    private final Object initializedClass;
 
 
 
     public CommandLoader(Class<?> commandLoaderClass) {
         this.commandloaderClass = commandLoaderClass;
         try {
-            this.initalizedClass = commandLoaderClass.newInstance();
+            this.initializedClass = commandLoaderClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -47,8 +47,8 @@ public class CommandLoader {
         }
     }
 
-    public Object getInitalizedClass() {
-        return initalizedClass;
+    public Object getInitializedClass() {
+        return initializedClass;
     }
 
     private CommandMap getCommandMap() {
